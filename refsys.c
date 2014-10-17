@@ -235,6 +235,9 @@ void icrs_to_itrs(double mjd,double a[3][3])
   matrix_multiply(a,n,b);
   matrix_multiply(b,p,a);
 
+  // Hardcode to earth orientation only
+  rotate_z(h+dpsi*cos(eps+deps),a);
+
   return;
 }
 
