@@ -10,8 +10,8 @@ LFLAGS = -lm -lcpgplot -lpgplot -lX11 -fno-backslash -lpng
 CC = gcc
 F77 = gfortran
 
-numint: numint.o vecmat.o jgm3.o refsys.o
-	$(CC) -o numint numint.o vecmat.o jgm3.o refsys.o $(LFLAGS)
+numint: numint.o vecmat.o force.o refsys.o rk.o
+	$(CC) -o numint numint.o vecmat.o force.o refsys.o rk.o $(LFLAGS)
 
 clean:
 	rm -f *.o
