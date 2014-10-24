@@ -8,3 +8,4 @@ void vector_multiply(double a[3][3],double b[3],double c[3]);
 void vector_multiply_in_place(double a[3][3],double b[3]);
 double dot_product(double a[3],double b[3]);
 double magnitude(double a[3]);
+void cross_product(double a[3],double b[3],double c[3]);

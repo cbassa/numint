@@ -16,9 +16,9 @@ void accel(double t,double r[],double drdt[])
 {
   int i;
   double mjd;
-  double e[3][3],rin[3],a[3],r_moon[3],r_sun[3],a_moon[3],a_sun[3],a_srp[3];
+  double e[3][3],f[3][3],rin[3],vin[3],a[3],r_moon[3],r_sun[3],a_moon[3],a_sun[3],a_srp[3],a_drag[3];
   int err_code;
-  double area=1.0,mass=1000.0,cr=1.5,illum;
+  double area=1e-6,mass=1000.0,cr=1.5,cd=2.0,illum;
 
   // Get time
   mjd=mjd0+t/86400.0;
@@ -26,10 +26,13 @@ void accel(double t,double r[],double drdt[])
   // Compute transformation
   //icrs_to_itrs(mjd,e);
   eci_to_ecef(mjd,e);
+  icrs_to_eme(mjd,f);
 
-  // Input vector
-  for (i=0;i<3;i++) 
+  // Input vectors
+  for (i=0;i<3;i++) {
     rin[i]=r[i];
+    vin[i]=r[i+3];
+  }
 
   // Compute geopotential
   jgm3_geopotential(rin,e,20,20,a);
@@ -43,13 +46,16 @@ void accel(double t,double r[],double drdt[])
   third_body(rin,r_moon,GM_MOON,a_moon);
 
   // Solar radiation pressure
-  illum=illumination(r,r_sun);
+  illum=illumination(rin,r_sun);
   srp(rin,r_sun,area,mass,cr,a_srp);
+
+  // Drag
+  drag(rin,vin,r_sun,f,area,mass,cd,a_drag);
 
   // Derivatives
   for (i=0;i<3;i++) {
     drdt[i]=r[i+3];
-    drdt[i+3]=a[i]+a_moon[i]+a_sun[i]; //+a_srp[i]*illum;
+    drdt[i+3]=a[i]+a_moon[i]+a_sun[i]+a_drag[i]+a_srp[i]*illum;
   }
 
   return;
@@ -59,14 +65,14 @@ int main(int argc,char *argv[])
 {
   int i,j,n=6;
   double r[6],drdt[6],rout[6],rerr[6];
-  double t,dt;
+  double t,dt,rr,rv,ra;
   char nams[1018][6];
   double vals[1018];
 
   // Initialize JPL ephemerides
   ephem=jpl_init_ephemeris("lnxp1600p2200.405",nams,vals);
 
-  /*
+
   // ISS
   mjd0=56946.75000;
   r[0]=5314.1173;
@@ -77,7 +83,7 @@ int main(int argc,char *argv[])
   r[5]=-6.00570;
   t=0.0;
   dt=10.0;
-
+  /*
   // Chang'e 5-T1
   mjd0=56953.78125;
   r[0]=-7510.8025;
@@ -111,7 +117,7 @@ int main(int argc,char *argv[])
   r[5]=+1.21542;
   t=0.0;
   dt=10.0;
-  */
+
   // COSMOS 2342
   mjd0=56293.0;
   r[0]=18585.9274;
@@ -122,12 +128,21 @@ int main(int argc,char *argv[])
   r[5]=+1.21542;
   t=0.0;
   dt=120.0;
+  */
 
 
   for (i=0;i<18000;i++) {
-    printf("%14.8lf %f %f %f %f %f %f\n",mjd0+t/86400.0,r[0],r[1],r[2],r[3],r[4],r[5]);
-
     accel(t,r,drdt);
+
+    rr=sqrt(r[0]*r[0]+r[1]*r[1]+r[2]*r[2]);
+    rv=sqrt(r[3]*r[3]+r[4]*r[4]+r[5]*r[5]);
+    ra=sqrt(drdt[3]*drdt[3]+drdt[4]*drdt[4]+drdt[5]*drdt[5]);
+    printf("%14.8lf %f %f %f %f %f %f %f %f %e\n",mjd0+t/86400.0,r[0],r[1],r[2],r[3],r[4],r[5],rr-XKMPER,rv,ra);
+
+    if (rr<XKMPER+100.0) {
+      fprintf(stderr,"Satellite crashed");
+      break;
+    }
     rkck(r,drdt,n,t,dt,rout,rerr,accel);
     
     for (j=0;j<n;j++)

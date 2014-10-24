@@ -104,6 +104,33 @@ void eci_to_ecef(double mjd,double g[3][3])
   return;
 }
 
+// ICRS to EME conversion
+void icrs_to_eme(double mjd,double a[3][3])
+{
+  int i,j;
+  double dpsi,deps,eps,z,theta,zeta,h;
+  double p[3][3],n[3][3];
+
+  // Precession
+  precess(51544.5,mjd,&zeta,&z,&theta);
+  identity_matrix(p);
+  rotate_z(-zeta,p);
+  rotate_y(theta,p);
+  rotate_z(-z,p);
+
+  // Nutation
+  nutation(mjd,&dpsi,&deps,&eps);
+  identity_matrix(n);
+  rotate_x(eps,n);
+  rotate_z(-dpsi,n);
+  rotate_x(-eps-deps,n);
+
+  // Multiply matrices (left to right)
+  matrix_multiply(n,p,a);
+
+  return;
+}
+
 // ICRS to ITRS conversion
 void icrs_to_itrs(double mjd,double a[3][3])
 {
@@ -169,4 +196,16 @@ void moon_position(double mjd,void *ephem,double r_moon[3])
     r_moon[i]=rv[i]*XKMPAU;
 
   return;
+}
+
+// Geodetic height
+double geodetic_height(double r[3])
+{
+  double h;
+
+  // TO DO: COMPUTE ACTUAL GEODETIC HEIGHT
+
+  h=magnitude(r)-XKMPER;
+
+  return h;
 }
