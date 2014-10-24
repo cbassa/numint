@@ -16,8 +16,9 @@ void accel(double t,double r[],double drdt[])
 {
   int i;
   double mjd;
-  double e[3][3],rin[3],a[3],r_moon[3],r_sun[3],a_moon[3],a_sun[3];
+  double e[3][3],rin[3],a[3],r_moon[3],r_sun[3],a_moon[3],a_sun[3],a_srp[3];
   int err_code;
+  double area=1.0,mass=1000.0,cr=1.5,illum;
 
   // Get time
   mjd=mjd0+t/86400.0;
@@ -41,10 +42,14 @@ void accel(double t,double r[],double drdt[])
   moon_position(mjd,ephem,r_moon);
   third_body(rin,r_moon,GM_MOON,a_moon);
 
+  // Solar radiation pressure
+  illum=illumination(r,r_sun);
+  srp(rin,r_sun,area,mass,cr,a_srp);
+
   // Derivatives
   for (i=0;i<3;i++) {
     drdt[i]=r[i+3];
-    drdt[i+3]=a[i]+a_moon[i]+a_sun[i];
+    drdt[i+3]=a[i]+a_moon[i]+a_sun[i]; //+a_srp[i]*illum;
   }
 
   return;
@@ -72,7 +77,7 @@ int main(int argc,char *argv[])
   r[5]=-6.00570;
   t=0.0;
   dt=10.0;
-  */
+
   // Chang'e 5-T1
   mjd0=56953.78125;
   r[0]=-7510.8025;
@@ -83,7 +88,7 @@ int main(int argc,char *argv[])
   r[5]=-4.57691;
   t=0.0;
   dt=120.0;
-  /*
+
   // Apollo 13
   mjd0=40690.36339931;
   r[0]=-226427.771500;
@@ -106,7 +111,7 @@ int main(int argc,char *argv[])
   r[5]=+1.21542;
   t=0.0;
   dt=10.0;
-
+  */
   // COSMOS 2342
   mjd0=56293.0;
   r[0]=18585.9274;
@@ -117,7 +122,7 @@ int main(int argc,char *argv[])
   r[5]=+1.21542;
   t=0.0;
   dt=120.0;
-  */
+
 
   for (i=0;i<18000;i++) {
     printf("%14.8lf %f %f %f %f %f %f\n",mjd0+t/86400.0,r[0],r[1],r[2],r[3],r[4],r[5]);

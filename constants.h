@@ -5,3 +5,4 @@
 #define GM_EARTH 398600.4415 // [km^3/s^2]; JGM3
 #define GM_SUN 1.32712438e+11 // [km^3/s^2]; IAU 1976
 #define GM_MOON GM_EARTH/81.30056 // [km^3/s^2]; DE405
+#define P0 4.56e-6 // [N/m^2]

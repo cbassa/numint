@@ -7,6 +7,57 @@
 #include "vecmat.h"
 #include "constants.h"
 
+// Solar radiation pressure
+// a:  area [m^2]
+// m:  mass [kg]
+// cr: Radiation pressure coefficient
+void srp(double r[3],double s[3],double area,double mass,double cr,double a[3])
+{
+  int i;
+  double d[3],rd,fac;
+  
+  // Offset from satellite to Sun
+  for (i=0;i<3;i++) 
+    d[i]=r[i]-s[i];
+
+  // Distance
+  rd=magnitude(d);
+
+  // Factor
+  fac=cr*area/mass*P0*(XKMPAU*XKMPAU)*pow(rd,-3);
+
+  // Accelerations
+  for (i=0;i<3;i++)
+    a[i]=fac*d[i];
+  
+  return;
+}
+
+// Illumination
+double illumination(double r[3],double s[3])
+{
+  int i;
+  double e[3],rs,d[3],rd,a;
+
+  // Distance
+  rs=magnitude(s);
+
+  // Unit vector
+  for (i=0;i<3;i++)
+    e[i]=s[i]/rs;
+
+  // Projection
+  rs=dot_product(r,s);
+
+  // 
+  for (i=0;i<3;i++)
+    d[i]=r[i]-e[i]*rs;
+  rd=magnitude(d);
+
+  // Illumination fraction
+  return ((d>0 || rd>XKMPER) ? 1.0 : 0.0);
+}
+
 // Third body accelaration
 void third_body(double r[3],double s[3],double gm,double a[3])
 {    
