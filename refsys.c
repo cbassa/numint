@@ -146,11 +146,12 @@ void sun_position(double mjd,void *ephem,double r_sun[3])
 {
   int err_code;
   int i;
+  double rv[6];
 
-  err_code=jpl_pleph(ephem,mjd+2400000.5,11,3,r_sun,0);
-  
+  err_code=jpl_pleph(ephem,mjd+2400000.5,11,3,rv,0);
+
   for (i=0;i<3;i++)
-    r_sun[i]*=XKMPAU;
+    r_sun[i]=rv[i]*XKMPAU;
 
   return;
 }
@@ -160,11 +161,12 @@ void moon_position(double mjd,void *ephem,double r_moon[3])
 {
   int err_code;
   int i;
+  double rv[6];
 
-  err_code=jpl_pleph(ephem,mjd+2400000.5,10,3,r_moon,0);
-  
+  err_code=jpl_pleph(ephem,mjd+2400000.5,10,3,rv,0);
+
   for (i=0;i<3;i++)
-    r_moon[i]*=XKMPAU;
+    r_moon[i]=rv[i]*XKMPAU;
 
- return;
+  return;
 }
