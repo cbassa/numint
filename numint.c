@@ -55,7 +55,7 @@ void accel(double t,double r[],double drdt[])
   // Derivatives
   for (i=0;i<3;i++) {
     drdt[i]=r[i+3];
-    drdt[i+3]=a[i]+a_moon[i]+a_sun[i]+a_drag[i]+a_srp[i]*illum;
+    drdt[i+3]=a[i]+a_moon[i]+a_sun[i];//+a_drag[i]+a_srp[i]*illum;
   }
 
   return;
@@ -65,14 +65,14 @@ int main(int argc,char *argv[])
 {
   int i,j,n=6;
   double r[6],drdt[6],rout[6],rerr[6];
-  double t,dt,rr,rv,ra;
+  double t,dt,rr,rv,ra,r_moon[3],rm;
   char nams[1018][6];
   double vals[1018];
 
   // Initialize JPL ephemerides
   ephem=jpl_init_ephemeris("lnxp1600p2200.405",nams,vals);
 
-
+  /*
   // ISS
   mjd0=56946.75000;
   r[0]=5314.1173;
@@ -83,6 +83,7 @@ int main(int argc,char *argv[])
   r[5]=-6.00570;
   t=0.0;
   dt=10.0;
+  */
   /*
   // Chang'e 5-T1
   mjd0=56953.78125;
@@ -130,17 +131,32 @@ int main(int argc,char *argv[])
   dt=120.0;
   */
 
+  // Chang'E 5-T1 spacetrack elset
+  mjd0=56954.00000;
+  r[0]=-40506.6555;
+  r[1]=-60908.2891;
+  r[2]=-35723.7912;
+  r[3]=-0.67359;
+  r[4]=-2.53569;
+  r[5]=-0.99681;
+  t=0.0;
+  dt=-10.0;
 
   for (i=0;i<18000;i++) {
     accel(t,r,drdt);
 
+    moon_position(mjd0+t/86400.0,ephem,r_moon);
+    for (j=0;j<3;j++)
+      r_moon[j]-=r[j];
+    rm=magnitude(r_moon);
+
     rr=sqrt(r[0]*r[0]+r[1]*r[1]+r[2]*r[2]);
     rv=sqrt(r[3]*r[3]+r[4]*r[4]+r[5]*r[5]);
     ra=sqrt(drdt[3]*drdt[3]+drdt[4]*drdt[4]+drdt[5]*drdt[5]);
-    printf("%14.8lf %f %f %f %f %f %f %f %f %e\n",mjd0+t/86400.0,r[0],r[1],r[2],r[3],r[4],r[5],rr-XKMPER,rv,ra);
+    printf("%14.8lf %f %f %f %f %f %f %f %f %f\n",mjd0+t/86400.0,r[0],r[1],r[2],r[3],r[4],r[5],rr-XKMPER,rv,rm-1737.5);
 
     if (rr<XKMPER+100.0) {
-      fprintf(stderr,"Satellite crashed");
+      fprintf(stderr,"Satellite crashed\n");
       break;
     }
     rkck(r,drdt,n,t,dt,rout,rerr,accel);
