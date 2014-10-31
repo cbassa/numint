@@ -140,9 +140,9 @@ int main(int argc,char *argv[])
   r[4]=-2.53569;
   r[5]=-0.99681;
   t=0.0;
-  dt=-10.0;
+  dt=120.0;
 
-  for (i=0;i<18000;i++) {
+  for (i=0;i<180000;i++) {
     accel(t,r,drdt);
 
     moon_position(mjd0+t/86400.0,ephem,r_moon);
@@ -153,7 +153,7 @@ int main(int argc,char *argv[])
     rr=sqrt(r[0]*r[0]+r[1]*r[1]+r[2]*r[2]);
     rv=sqrt(r[3]*r[3]+r[4]*r[4]+r[5]*r[5]);
     ra=sqrt(drdt[3]*drdt[3]+drdt[4]*drdt[4]+drdt[5]*drdt[5]);
-    printf("%14.8lf %f %f %f %f %f %f %f %f %f\n",mjd0+t/86400.0,r[0],r[1],r[2],r[3],r[4],r[5],rr-XKMPER,rv,rm-1737.5);
+    printf("%14.8lf %f %f %f %f %f %f %f %f %f\n",mjd0+t/86400.0,r[0],r[1],r[2],r[3],r[4],r[5],rr,rv,rm);
 
     if (rr<XKMPER+100.0) {
       fprintf(stderr,"Satellite crashed\n");
