@@ -5,6 +5,7 @@ void precess(double mjd0,double mjd,double *zeta,double *z,double *theta);
 void icrs_to_itrs(double mjd,double a[3][3]);
 void eci_to_ecef(double mjd,double a[3][3]);
 void icrs_to_eme(double mjd,double a[3][3]);
+void icrs_to_teme(double mjd,double a[3][3]);
 void sun_position(double mjd,void *ephem,double r_sun[3]);
 void moon_position(double mjd,void *ephem,double r_moon[3]);
 double geodetic_height(double r[3]);

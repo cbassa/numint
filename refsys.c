@@ -131,6 +131,38 @@ void icrs_to_eme(double mjd,double a[3][3])
   return;
 }
 
+// ICRS to TEME conversion
+void icrs_to_teme(double mjd,double a[3][3])
+{
+  int i,j;
+  double dpsi,deps,eps,z,theta,zeta,h;
+  double p[3][3],n[3][3],q[3][3],b[3][3];
+
+  // Precession
+  precess(51544.5,mjd,&zeta,&z,&theta);
+  identity_matrix(p);
+  rotate_z(-zeta,p);
+  rotate_y(theta,p);
+  rotate_z(-z,p);
+
+  // Nutation
+  nutation(mjd,&dpsi,&deps,&eps);
+  identity_matrix(n);
+  rotate_x(eps,n);
+  rotate_z(-dpsi,n);
+  rotate_x(-eps-deps,n);
+
+  // Equation of equinoxes
+  identity_matrix(q);
+  rotate_z(dpsi*cos(eps+deps),q);
+
+  // Multiply matrices (left to right)
+  matrix_multiply(q,n,b);
+  matrix_multiply(b,p,a);
+
+  return;
+}
+
 // ICRS to ITRS conversion
 void icrs_to_itrs(double mjd,double a[3][3])
 {
